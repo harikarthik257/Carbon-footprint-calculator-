@@ -1,0 +1,27 @@
+# --- secrets, never commit ---
+.env
+.env.*
+!.env.example
+
+# --- Python / backend ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# --- Node / frontend ---
+node_modules/
+dist/
+*.tsbuildinfo
+npm-debug.log*
+
+# --- editor / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Claude Code session artifacts ---
+.claude/scheduled_tasks.lock

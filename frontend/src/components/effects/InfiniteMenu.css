@@ -1,0 +1,121 @@
+#infinite-grid-menu-canvas {
+  cursor: grab;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  outline: none;
+}
+
+#infinite-grid-menu-canvas:active {
+  cursor: grabbing;
+}
+
+.action-button {
+  position: absolute;
+  left: 50%;
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  background: #1f3d2b;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 4px solid #eef1ea;
+}
+
+.face-title {
+  user-select: none;
+  position: absolute;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #eef1ea;
+  left: 1.2em;
+  top: 50%;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+
+.action-button-icon {
+  user-select: none;
+  position: relative;
+  color: #eef1ea;
+  top: 1px;
+  font-size: 20px;
+}
+
+.face-title {
+  position: absolute;
+  top: 50%;
+  transform: translate(20%, -50%);
+}
+
+.face-title.active {
+  opacity: 1;
+  transform: translate(20%, -50%);
+  pointer-events: auto;
+  transition: 0.5s ease;
+}
+
+.face-title.inactive {
+  pointer-events: none;
+  opacity: 0;
+  transition: 0.1s ease;
+}
+
+.face-description {
+  user-select: none;
+  position: absolute;
+  max-width: 14ch;
+  top: 50%;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.85rem;
+  color: #eef1ea;
+  right: 1%;
+  transform: translate(0, -50%);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+
+.face-description.active {
+  opacity: 1;
+  transform: translate(-90%, -50%);
+  pointer-events: auto;
+  transition: 0.5s ease;
+}
+
+.face-description.inactive {
+  pointer-events: none;
+  transform: translate(-60%, -50%);
+  opacity: 0;
+  transition: 0.1s ease;
+}
+
+.action-button {
+  position: absolute;
+  left: 50%;
+}
+
+.action-button.active {
+  bottom: 1em;
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+  transition: 0.5s ease;
+}
+
+.action-button.inactive {
+  bottom: -80px;
+  transform: translateX(-50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.1s ease;
+}
+
+@media (max-width: 640px) {
+  .face-title,
+  .face-description {
+    display: none;
+  }
+}

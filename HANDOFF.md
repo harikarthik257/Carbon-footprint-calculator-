@@ -1,0 +1,121 @@
+# HANDOFF.md — final Round 1 status
+
+This repo is **code-frozen for Round 1** (15 Aug submission). Everything below is
+built, wired, and verified end to end in a real browser against a real running
+backend — not just read from source. `CLAUDE.md` has the permanent stack/convention
+memory; this file is the snapshot of what actually exists right now.
+
+---
+
+## What's built and verified
+
+**Backend — FastAPI, 7 endpoints, 12 tests passing (`pytest engine/tests -v`).**
+
+- `/api/health` — `{"status": "ok", "mock_ai": bool}`
+- `/api/calculate` — daily footprint from onboarding answers (transport/energy/food/waste)
+- `/api/calculate-meal` — confirmed meal items → kg CO2e
+- `/api/log-meal` — photo → structured food items (Claude vision, mock-fallback)
+- `/api/recommend` — footprint breakdown → 2–3 ranked strategies (Claude text, mock-fallback)
+- `/api/leaderboard` — synthetic hostel leaderboard (`is_synthetic: true`)
+- `/api/benchmark` — India national daily per-capita average, for the dashboard's
+  "how you compare" stat (sourced: World Bank / Global Carbon Project, ~1.9 t/year;
+  labeled illustrative since it's a national all-sector figure, not a precise
+  like-for-like match to this app's four categories)
+
+`backend/data/emission_factors.py` is still the single source of truth for every
+number the app shows — including the new benchmark constant.
+
+**Frontend — full flow verified live via Playwright, zero console errors across
+one continuous session touching every feature in order.**
+
+- **Onboarding wizard** — 4 steps (transport, energy, food, waste)
+- **Dashboard** — footprint total, category breakdown chart (Recharts)
+- **Multi-strategy recommendations** — 2–3 ranked strategies, each with its own
+  estimated kg CO2e/day saving, mock-labeled when running on mock data
+- **Benchmark comparison** ("How you compare") — user's total vs. the India daily
+  average, with a plain-language delta and the source cited inline
+- **Meal logging, two paths into the same confirm step:**
+  - **Manual entry** — an "Add a food item manually" button starts an empty,
+    editable item row (name + quantity) with no photo required
+  - **Photo upload** — Claude vision extracts items from a tray photo into the
+    same editable list
+  - Both paths share one "Confirm and log" step before anything affects the
+    total — the PRD §4 editable-confirm requirement, satisfied either way
+- **What-if slider** — live recalculation through the existing `/api/calculate`
+  endpoint (no duplicated emission math in the frontend), confirmed to produce a
+  real, correct delta when transport mode or distance changes
+- **Hostel leaderboard** — ranked list plus a drag-to-rotate 3D sphere of the five
+  hostels, each named after and photographed as a real Northeast India river/lake
+  (Brahmaputra, Kopili, Burhi Dihing, Manas, Umiam), linked to their Wikipedia articles
+
+**Visual/motion layer — all real, wired, and verified rendering correctly:**
+
+- `MaskedHeading` — the "Campus Carbon" header title, a campus photo masked
+  through the letters
+- `ScrollExpand` — the "Your Campus Footprint" panel at the top of the dashboard,
+  driven by the page's own scroll (not an isolated scroll trap — fixed after an
+  earlier version locked users inside a small box)
+- `ParticleText` — the small "Ways to cut your footprint" label inside the
+  recommendation card
+- `InfiniteMenu` — the leaderboard's 3D hostel sphere (WebGL2, `gl-matrix`)
+
+**Explicitly NOT wired in, by request — code still exists in
+`frontend/src/components/effects/` if wanted later:**
+
+- `Galaxy` (starfield background) and `SplashCursor` (fluid cursor trail) were
+  built, wired page-wide, then explicitly reverted back out. Don't be confused
+  finding the component files — they're unused.
+- `RippleDistortion` was requested twice but its source was truncated both times
+  in the chat that specified it. Never built. If it's wanted, it needs the
+  complete component source pasted again.
+
+## AI calls run fully on mock responses by design
+
+Both AI calls (`extract_meal_from_photo`, `generate_recommendation` in
+`backend/engine/claude_client.py`) fall back to mock data (tagged `is_mock: true`)
+whenever `ANTHROPIC_API_KEY` isn't set, `MOCK_AI=true` is forced, **or the Anthropic
+API call itself fails for any reason** (rate limit, network error, an
+out-of-credits account — confirmed working against a real key that had run out of
+credits). This is the accepted Round 1 posture, not a stopgap: the whole demo runs
+end to end on mock responses, and every mock-derived value in the UI is labeled
+`mock response` so a judge always knows which numbers came from a live model call
+versus a canned one.
+
+`extract_meal_from_photo` additionally tolerates a model response wrapped in a
+markdown code fence or prose (strips it before parsing, falls back to mock if it's
+still not valid JSON) — this was never actually exercised against a live model
+response, since the funded-key testing never got past the credits issue below.
+
+Swapping in a funded `ANTHROPIC_API_KEY` requires zero code changes — drop it into
+`backend/.env`, restart the server, and real calls take over automatically. The
+dotenv wiring is confirmed working (`/api/health` returned `mock_ai: false` with a
+real key loaded), but the account had no credits and the team decided not to
+purchase any before the 15 Aug deadline — so the JSON-parsing tolerance above is
+still genuinely untested against a real response, not a settled question.
+
+## Known gaps / judgment calls, worth a second look past Round 1
+
+- **India grid electricity factor**: `energy.grid_electricity_kwh` uses the
+  *national* CEA average (0.71 kg CO2e/kWh). There's also a
+  `..._hydro_weighted` factor (0.30) for the Northeast regional grid, more
+  accurate for an IIT Guwahati-specific claim — wired into the calculator but not
+  surfaced as a choice in onboarding yet.
+- **Meal photo → factor matching** (`FOOD_ITEM_TO_FACTOR_KEY` in `calculator.py`)
+  only covers ~10 canonical dish names; anything else falls back to a
+  conservative default rather than zero. Check against real IITG dining hall menu
+  items and extend the list — highest-leverage improvement before a live demo.
+- **Benchmark comparison is a national, all-sector figure**, not a precise
+  like-for-like sum of just transport/energy/food/waste. Labeled as illustrative
+  context in the UI; a more defensible v2 would benchmark against a
+  transport+energy+food+waste-only reference if one can be sourced.
+- **CORS is wide open** (`allow_origins=["*"]`) — fine for a hackathon demo,
+  tighten past Round 2.
+- **No auth, no persistence** — deliberate, per `PRD.md` §5 cut list.
+
+## Where the context lives
+
+- `PRD.md` — scope, cut list, task breakdown, the actual marking scheme this is scored against
+- `CLAUDE.md` — permanent stack/convention memory, loads automatically every session
+- `.claude/skills/hackathon-team-stack/SKILL.md` — API contract, emission-factor conventions
+- `pitch/screenshots/` — current, freshly captured screenshots for the Round 1 deck
+- `HOOKS.md` — why each hook in `.claude/settings.json` exists
