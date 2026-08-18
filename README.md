@@ -63,7 +63,7 @@ emissions math itself.
 ```bash
 # Backend — port 8001 (not FastAPI/uvicorn's default 8000; see CLAUDE.md for why)
 cd backend
-pip install -r requirements.txt
+pip install -r requirements.txt --break-system-packages
 uvicorn api.main:app --reload --port 8001
 
 # Frontend, in a second terminal
