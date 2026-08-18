@@ -32,5 +32,5 @@ def health():
     import os as _os
     return {
         "status": "ok",
-        "mock_ai": not bool(_os.environ.get("ANTHROPIC_API_KEY")) or _os.environ.get("MOCK_AI", "").lower() == "true",
+        "mock_ai": not bool(_os.environ.get("GEMINI_API_KEY")) or _os.environ.get("MOCK_AI", "").lower() == "true",
     }

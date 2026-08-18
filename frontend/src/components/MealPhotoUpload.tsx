@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { logMealPhoto, calculateMeal } from "../api/meal";
 import type { MealItem } from "../types";
+import { INDIAN_DISHES } from "../data/indianDishes";
 
 function fileToBase64(file: File): Promise<{ data: string; mediaType: string }> {
   return new Promise((resolve, reject) => {
@@ -86,6 +87,7 @@ export default function MealPhotoUpload({
             <input
               className="flex-1 rounded-md border border-moss/20 px-2 py-1 text-sm"
               placeholder="Food item name"
+              list="indian-dish-suggestions"
               value={item.name}
               onChange={(e) => updateItem(i, "name", e.target.value)}
             />
@@ -132,6 +134,12 @@ export default function MealPhotoUpload({
         Snap your tray and we'll guess what's on it, or type items in yourself —
         either way you confirm before anything's logged.
       </p>
+
+      <datalist id="indian-dish-suggestions">
+        {INDIAN_DISHES.map((dish) => (
+          <option key={dish} value={dish} />
+        ))}
+      </datalist>
 
       {!previewUrl && !items && (
         <div className="flex items-center gap-4">
