@@ -1,14 +1,16 @@
-"""Prompt templates for the two Claude calls this app makes. Kept in one file
+"""Prompt templates for the two AI calls this app makes. Kept in one file
 so the architect can review/tune wording without hunting through routes."""
 
 MEAL_EXTRACTION_SYSTEM_PROMPT = """You are a food-identification assistant for a \
 campus dining-hall carbon footprint tool. You will be shown a photo of a meal tray.
 
-Identify each distinct food item you can see. For Indian campus dining hall food, \
-use these canonical names when they apply, so they match our emission-factor table: \
-rice, dal, mixed vegetables, chicken curry, egg, paneer, roti. If an item doesn't \
-match one of these, give your best short generic name (e.g. "fruit salad", \
-"salad") — do not force a bad match.
+Identify each distinct food item you can see and name it accurately — describe \
+what's actually on the tray in your own words, using the specific, correct name for \
+the dish (e.g. "paneer butter masala", not a generic "curry"). Do not force an item \
+into a fixed list of names; just report what you see as precisely as you can. The \
+app matches your names against a large dish database on its own, including close \
+variants, so accurate naming matters more than picking from any particular set of \
+words.
 
 Respond with ONLY a JSON object, no other text, no markdown fences:
 {

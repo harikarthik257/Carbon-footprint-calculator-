@@ -129,25 +129,150 @@ def calculate_daily_footprint(onboarding: dict) -> FootprintResult:
     return FootprintResult(total_kg_co2e=total, by_category=by_category, factors_used=factors_used)
 
 
-# Map of known food-item names (as the vision model might label them) to
-# emission-factor keys. Deliberately small and India-campus-dining specific —
-# extend this list before extending anything else if meal logging accuracy
-# needs improving.
+# Map of known food-item names/variants to emission-factor keys. Covers
+# ~100 everyday Indian dishes (see data/emission_factors.py) so both the
+# manual-entry list and the photo-extraction path have real sourced numbers
+# behind most of what a student would actually log, not just a handful of
+# canonical names.
 FOOD_ITEM_TO_FACTOR_KEY = {
-    "rice": "food.rice_serving",
-    "dal": "food.dal_serving",
-    "lentils": "food.dal_serving",
-    "mixed vegetables": "food.vegetable_sabzi_serving",
-    "vegetable sabzi": "food.vegetable_sabzi_serving",
-    "sabzi": "food.vegetable_sabzi_serving",
-    "chicken curry": "food.chicken_curry_serving",
-    "chicken": "food.chicken_curry_serving",
-    "egg": "food.egg_item",
-    "boiled egg": "food.egg_item",
+    # Rice / grain
+    "rice": "food.rice_serving", "plain rice": "food.rice_serving", "steamed rice": "food.rice_serving",
+    "jeera rice": "food.jeera_rice_serving", "cumin rice": "food.jeera_rice_serving",
+    "lemon rice": "food.lemon_rice_serving",
+    "curd rice": "food.curd_rice_serving",
+    "pulao": "food.pulao_serving", "pilaf": "food.pulao_serving", "veg pulao": "food.pulao_serving",
+    "veg biryani": "food.veg_biryani_serving", "vegetable biryani": "food.veg_biryani_serving",
+    "chicken biryani": "food.chicken_biryani_serving",
+    "mutton biryani": "food.mutton_biryani_serving",
+    "khichdi": "food.khichdi_serving",
+    "poha": "food.poha_serving",
+    "upma": "food.upma_serving",
+    # Breads
+    "roti": "food.roti_item", "chapati": "food.roti_item", "phulka": "food.roti_item",
+    "naan": "food.naan_item",
+    "paratha": "food.paratha_plain_item", "plain paratha": "food.paratha_plain_item",
+    "aloo paratha": "food.aloo_paratha_item", "potato paratha": "food.aloo_paratha_item",
+    "poori": "food.poori_item", "puri": "food.poori_item",
+    "bhatura": "food.bhatura_item", "bhature": "food.bhatura_item",
+    # Dals / legumes
+    "dal": "food.dal_serving", "lentils": "food.dal_serving", "daal": "food.dal_serving",
+    "dal tadka": "food.dal_tadka_serving", "tadka dal": "food.dal_tadka_serving",
+    "dal makhani": "food.dal_makhani_serving",
+    "chana masala": "food.chana_masala_serving", "chickpea curry": "food.chana_masala_serving",
+    "rajma": "food.rajma_serving", "kidney bean curry": "food.rajma_serving",
+    "sambar": "food.sambar_serving", "sambhar": "food.sambar_serving",
+    "moong dal": "food.moong_dal_serving",
+    "chole": "food.chole_serving", "chhole": "food.chole_serving",
+    # Vegetable curries
+    "mixed vegetables": "food.vegetable_sabzi_serving", "vegetable sabzi": "food.vegetable_sabzi_serving",
+    "sabzi": "food.vegetable_sabzi_serving", "mixed veg": "food.vegetable_sabzi_serving",
+    "aloo gobi": "food.aloo_gobi_serving", "potato cauliflower curry": "food.aloo_gobi_serving",
+    "aloo matar": "food.aloo_matar_serving", "potato peas curry": "food.aloo_matar_serving",
+    "baingan bharta": "food.baingan_bharta_serving", "eggplant bharta": "food.baingan_bharta_serving",
+    "bhindi masala": "food.bhindi_masala_serving", "okra curry": "food.bhindi_masala_serving",
+    "mixed vegetable curry": "food.mixed_veg_curry_serving",
+    "cabbage sabzi": "food.cabbage_sabzi_serving", "cabbage curry": "food.cabbage_sabzi_serving",
+    "capsicum sabzi": "food.capsicum_sabzi_serving", "bell pepper curry": "food.capsicum_sabzi_serving",
+    "gobi manchurian": "food.gobi_manchurian_serving", "cauliflower manchurian": "food.gobi_manchurian_serving",
+    "veg kofta": "food.veg_kofta_serving", "vegetable kofta": "food.veg_kofta_serving",
+    "jeera aloo": "food.jeera_aloo_serving", "cumin potato": "food.jeera_aloo_serving",
+    "karela sabzi": "food.karela_sabzi_serving", "bitter gourd curry": "food.karela_sabzi_serving",
+    # Paneer
     "paneer": "food.paneer_serving",
-    "roti": "food.roti_item",
-    "chapati": "food.roti_item",
+    "paneer butter masala": "food.paneer_butter_masala_serving",
+    "palak paneer": "food.palak_paneer_serving", "spinach paneer": "food.palak_paneer_serving",
+    "shahi paneer": "food.shahi_paneer_serving",
+    "paneer tikka": "food.paneer_tikka_serving",
+    # Non-veg
+    "chicken curry": "food.chicken_curry_serving", "chicken": "food.chicken_curry_serving",
+    "chicken 65": "food.chicken_65_serving",
+    "tandoori chicken": "food.tandoori_chicken_serving",
+    "butter chicken": "food.butter_chicken_serving",
+    "chicken tikka": "food.chicken_tikka_serving",
+    "egg": "food.egg_item", "boiled egg": "food.egg_item",
+    "egg curry": "food.egg_curry_serving",
+    "egg bhurji": "food.egg_bhurji_serving", "scrambled egg": "food.egg_bhurji_serving",
+    "mutton curry": "food.mutton_curry_serving", "lamb curry": "food.mutton_curry_serving",
+    "mutton keema": "food.mutton_keema_serving", "keema": "food.mutton_keema_serving",
+    "fish curry": "food.fish_curry_serving",
+    "fish fry": "food.fish_fry_serving",
+    "prawn curry": "food.prawn_curry_serving", "shrimp curry": "food.prawn_curry_serving",
+    "chicken soup": "food.chicken_soup_serving",
+    # South Indian
+    "idli": "food.idli_item",
+    "dosa": "food.dosa_item", "plain dosa": "food.dosa_item",
+    "masala dosa": "food.masala_dosa_item",
+    "uttapam": "food.uttapam_item", "uthappam": "food.uttapam_item",
+    "vada": "food.vada_item",
+    "rasam": "food.rasam_serving",
+    "medu vada": "food.medu_vada_item",
+    "appam": "food.appam_item",
+    # Snacks / street food
+    "samosa": "food.samosa_item",
+    "pakora": "food.pakora_serving", "bhajji": "food.pakora_serving", "bhaji": "food.pakora_serving",
+    "vada pav": "food.vada_pav_item",
+    "dhokla": "food.dhokla_serving",
+    "bhel puri": "food.bhel_puri_serving", "bhelpuri": "food.bhel_puri_serving",
+    "pani puri": "food.pani_puri_serving", "golgappa": "food.pani_puri_serving", "gupchup": "food.pani_puri_serving",
+    "kachori": "food.kachori_item",
+    "aloo tikki": "food.aloo_tikki_item", "potato tikki": "food.aloo_tikki_item",
+    "sev puri": "food.sev_puri_serving",
+    "cutlet": "food.cutlet_item", "vegetable cutlet": "food.cutlet_item",
+    # Dairy / sides
+    "curd": "food.curd_serving", "yogurt": "food.curd_serving", "dahi": "food.curd_serving",
+    "raita": "food.raita_serving",
+    "lassi": "food.lassi_serving",
+    "buttermilk": "food.buttermilk_serving", "chaas": "food.buttermilk_serving",
+    "papad": "food.papad_item", "papadum": "food.papad_item",
+    "pickle": "food.pickle_serving", "achaar": "food.pickle_serving",
+    "ghee": "food.ghee_serving",
+    "butter": "food.butter_serving",
+    # Sweets
+    "gulab jamun": "food.gulab_jamun_item",
+    "jalebi": "food.jalebi_serving",
+    "rasgulla": "food.rasgulla_item",
+    "kheer": "food.kheer_serving", "rice pudding": "food.kheer_serving",
+    "halwa": "food.halwa_serving",
+    "laddoo": "food.laddoo_item", "ladoo": "food.laddoo_item",
+    "barfi": "food.barfi_item", "burfi": "food.barfi_item",
+    "kaju katli": "food.kaju_katli_item",
+    "rabri": "food.rabri_serving",
+    "shrikhand": "food.shrikhand_serving",
+    # Soups / beverages
+    "veg soup": "food.veg_soup_serving", "vegetable soup": "food.veg_soup_serving",
+    "tomato soup": "food.tomato_soup_serving",
+    "tea": "food.tea_serving", "chai": "food.tea_serving",
+    "coffee": "food.coffee_serving",
+    # Combos / thali
+    "veg thali": "food.veg_thali_serving", "vegetarian thali": "food.veg_thali_serving",
+    "non veg thali": "food.non_veg_thali_serving", "non-veg thali": "food.non_veg_thali_serving",
+    "mini meal": "food.mini_meal_serving",
 }
+
+# Longest-name-first so a specific match ("chicken biryani") is tried before
+# a shorter one it happens to contain ("chicken curry" via "chicken").
+_SORTED_FOOD_NAMES = sorted(FOOD_ITEM_TO_FACTOR_KEY, key=len, reverse=True)
+
+
+_MIN_FUZZY_MATCH_LEN = 4  # below this, substring matching false-positives too
+                          # easily (e.g. "tea" inside "sTEAmed vegetables")
+
+
+def _match_factor_key(name: str) -> str:
+    """Exact match first; if that misses, fall back to a substring match in
+    either direction so a free-form name the vision model wasn't told to
+    canonicalize (e.g. "spicy chicken curry with extra rice") still finds a
+    real factor instead of the flat unidentified-item guess. Short known
+    names (under _MIN_FUZZY_MATCH_LEN) are skipped for fuzzy matching —
+    they're too likely to appear inside an unrelated word by coincidence."""
+    if name in FOOD_ITEM_TO_FACTOR_KEY:
+        return FOOD_ITEM_TO_FACTOR_KEY[name]
+    for known_name in _SORTED_FOOD_NAMES:
+        if len(known_name) < _MIN_FUZZY_MATCH_LEN:
+            continue
+        if known_name in name or name in known_name:
+            return FOOD_ITEM_TO_FACTOR_KEY[known_name]
+    return "food.unidentified_item_fallback"
 
 
 def calculate_meal_emissions(food_items: list[dict]) -> FootprintResult:
@@ -163,7 +288,7 @@ def calculate_meal_emissions(food_items: list[dict]) -> FootprintResult:
     for item in food_items:
         name = (item.get("name") or "").strip().lower()
         quantity = float(item.get("quantity", 1) or 1)
-        key = FOOD_ITEM_TO_FACTOR_KEY.get(name, "food.unidentified_item_fallback")
+        key = _match_factor_key(name)
         use = _use(key, quantity)
         factors_used.append(use)
         total += use.subtotal_kg_co2e

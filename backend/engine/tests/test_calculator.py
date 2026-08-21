@@ -75,6 +75,45 @@ def test_unidentified_food_item_uses_fallback_not_zero():
     assert result.total_kg_co2e > 0
 
 
+def test_food_database_covers_at_least_100_dishes():
+    from data.emission_factors import EMISSION_FACTORS
+    dish_keys = [k for k in EMISSION_FACTORS if k.startswith("food.") and k != "food.unidentified_item_fallback"]
+    assert len(dish_keys) >= 100
+
+
+def test_expanded_dish_names_match_real_factors_not_fallback():
+    result = calculate_meal_emissions([
+        {"name": "Paneer butter masala", "quantity": 1},
+        {"name": "chicken biryani", "quantity": 1},
+        {"name": "gulab jamun", "quantity": 2},
+    ])
+    fallback = get_factor("food.unidentified_item_fallback")["value"]
+    expected = (
+        get_factor("food.paneer_butter_masala_serving")["value"]
+        + get_factor("food.chicken_biryani_serving")["value"]
+        + get_factor("food.gulab_jamun_item")["value"] * 2
+    )
+    assert result.total_kg_co2e == pytest.approx(expected)
+    # none of these should have silently landed on the flat fallback
+    assert all(f.value != fallback for f in result.factors_used)
+
+
+def test_free_form_name_still_fuzzy_matches_a_real_dish():
+    # The vision prompt no longer forces canonical names — a free-form
+    # description should still find a real factor via substring matching.
+    result = calculate_meal_emissions([{"name": "spicy chicken curry with extra rice", "quantity": 1}])
+    fallback = get_factor("food.unidentified_item_fallback")["value"]
+    assert result.total_kg_co2e != pytest.approx(fallback)
+    assert result.total_kg_co2e == pytest.approx(get_factor("food.chicken_curry_serving")["value"])
+
+
+def test_short_dish_names_dont_false_positive_inside_unrelated_words():
+    # "tea" (3 chars) must not fuzzy-match inside "steamed" ("...sTEAmed...").
+    result = calculate_meal_emissions([{"name": "steamed vegetables platter", "quantity": 1}])
+    tea = get_factor("food.tea_serving")["value"]
+    assert result.total_kg_co2e != pytest.approx(tea)
+
+
 def test_to_dict_rounds_and_is_json_serializable():
     result = calculate_daily_footprint({
         "transport": {"mode": "gasoline_car", "km_per_day": 3.333333},
