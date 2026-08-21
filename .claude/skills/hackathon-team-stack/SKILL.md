@@ -22,8 +22,10 @@ session benefiting from the same conventions actually matters.
 
 - **Frontend:** React + Vite + TypeScript + Tailwind CSS + Recharts
 - **Backend:** Python FastAPI, no database (deliberate — no auth/persistence for Round 1)
-- **AI:** Anthropic Python SDK (`anthropic` package) — vision calls for meal-photo
-  logging, text calls for personalized recommendations
+- **AI:** Google Gemini (`google-genai` package) — vision calls for meal-photo
+  logging, text calls for personalized recommendations. Swapped in from the
+  Anthropic SDK after the funded Anthropic account ran out of credits; Gemini's
+  free tier covers this project's call volume.
 - **Tests:** `pytest` for backend, especially the calculation engine
 - **Lint:** `ruff` (Python), `eslint` (frontend)
 
@@ -91,15 +93,15 @@ defensible in front of a judge instead of a black box.
   `backend/engine/tests/test_factors.py` asserting the calculation engine uses it
   correctly, then wire it into the relevant route.
 
-## Claude call conventions
+## AI call conventions
 
 - The calculation engine (pure Python, deterministic) always runs **before** any
-  Claude call. Claude never invents an emissions number — it receives already-computed
+  Gemini call. Gemini never invents an emissions number — it receives already-computed
   numbers and factors, and its job is (a) structured extraction from an image, or (b)
   turning numbers into a specific, personalized recommendation string.
 - Keep prompts in `backend/engine/prompts.py`, not inlined in route handlers, so the
   architect can review/tune wording in one place during integration.
-- Every Claude response used in the UI should be short enough to read in the demo
+- Every Gemini response used in the UI should be short enough to read in the demo
   without scrolling — cap recommendation text server-side if needed.
 
 ## Running things

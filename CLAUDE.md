@@ -30,7 +30,7 @@ where a fast, well-scaffolded Claude Code workflow is the actual differentiator.
 
 ## The one thing this project lives or dies on
 
-The Claude-powered layer (photo → food emissions, numbers → ranked personalized
+The AI-powered layer (photo → food emissions, numbers → ranked personalized
 strategies) is the differentiator versus every other "carbon calculator"
 submission — and Solution Innovation is 30% of the Round 1 score, the single largest
 line item. Never treat this feature as optional polish.
@@ -43,12 +43,14 @@ line item. Never treat this feature as optional polish.
 - **Backend:** Python FastAPI. No database — deliberate, per PRD.md §5 cut list
   (no auth, no persistence for Round 1); every response is computed fresh from
   `backend/data/emission_factors.py`, nothing is stored.
-- **AI:** Anthropic Python SDK — Claude for (1) structured extraction from a
+- **AI:** Google Gemini (`google-genai` SDK) — for (1) structured extraction from a
   meal-tray photo, (2) turning computed numbers into a personalized recommendation.
-  Claude never computes the emissions math itself — the calculation engine is
-  deterministic Python; Claude explains and personalizes numbers it's given, not
-  numbers it invents. This is what keeps the AI feature "grounded" instead of a
-  wrapper that can hallucinate a footprint.
+  Swapped in from the Anthropic SDK after the funded Anthropic account ran out of
+  credits and the team chose not to purchase more before the deadline; Gemini has
+  a real ongoing free tier. Gemini never computes the emissions math itself — the
+  calculation engine is deterministic Python; Gemini explains and personalizes
+  numbers it's given, not numbers it invents. This is what keeps the AI feature
+  "grounded" instead of a wrapper that can hallucinate a footprint.
 - **Package managers:** npm (frontend), pip with `requirements.txt` (backend).
 
 Override this once, early, if the team's actual strengths differ — then don't switch
@@ -60,7 +62,7 @@ again (see the playbook's "learning a new tool mid-event" failure mode).
 /frontend            React app — onboarding, dashboard, leaderboard, photo upload
 /backend/api          FastAPI routes: /calculate /calculate-meal /log-meal /recommend
                        /leaderboard /benchmark
-/backend/engine        Emission calculation engine + emission-factor data + Claude calls
+/backend/engine        Emission calculation engine + emission-factor data + Gemini calls
 /backend/data          Seed/synthetic leaderboard + emission-factor + benchmark tables
 /pitch                 Round 1 deck source, screenshots, demo clips, submission files
 CLAUDE.md
@@ -104,8 +106,8 @@ cd frontend && npm run lint
 - Leaderboard — synthetic seed data, labeled as illustrative if shown at all before 15 Aug.
 - Map/hotspot visualization — not built for Round 1.
 - AI calls (meal-photo extraction, recommendations) — fall back to realistic mock
-  data, tagged `is_mock: true` in the UI, whenever no funded `ANTHROPIC_API_KEY` is
-  available or the Anthropic call itself fails. See `HANDOFF.md` for why this is
+  data, tagged `is_mock: true` in the UI, whenever no `GEMINI_API_KEY` is
+  available or the Gemini call itself fails. See `HANDOFF.md` for why this is
   the accepted Round 1 posture, not a shortcut to fix later.
 - Benchmark comparison — a national per-capita average used as illustrative
   context, not a precise like-for-like sum of this app's own four categories.

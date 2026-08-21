@@ -173,7 +173,7 @@ hero feature and rubric priorities front-of-mind for everyone, not just whoever 
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'Reminder: the Claude vision + recommendation layer is the hero feature — see PRD.md §3. Do not cut it.'"
+            "command": "echo 'Reminder: the Gemini vision + recommendation layer is the hero feature — see PRD.md §3. Do not cut it.'"
           }
         ]
       }

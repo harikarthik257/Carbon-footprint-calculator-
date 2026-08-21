@@ -3,7 +3,7 @@
 A campus carbon footprint calculator built for **Avinya 2026: Prakriti EcoInnovate
 Challenge** (Prakriti × Techniche, IIT Guwahati) — Problem Statement #2. It measures
 a student's daily carbon footprint across transport, energy, food, and waste, then
-uses Claude to turn those numbers into personalized, ranked reduction strategies —
+uses Gemini to turn those numbers into personalized, ranked reduction strategies —
 grounded in a deterministic emissions engine, not invented by the model.
 
 ![Dashboard overview](pitch/screenshots/02-dashboard-overview.png)
@@ -13,13 +13,13 @@ grounded in a deterministic emissions engine, not invented by the model.
 - **4-step onboarding** — transport, energy, food, and waste habits, in under a minute
 - **Live dashboard** — total footprint, category breakdown chart, and a comparison
   against the India daily per-capita average (sourced, labeled illustrative)
-- **AI-grounded recommendations** — Claude turns an already-computed footprint
+- **AI-grounded recommendations** — Gemini turns an already-computed footprint
   breakdown into 2–3 ranked strategies with concrete kg CO₂e/day savings; it never
   invents the numbers, only explains and personalizes ones a deterministic Python
   engine already calculated
-- **Meal logging, two ways** — snap a tray photo (Claude vision extracts the items)
-  or type them in manually — both land in the same editable list before anything
-  is logged
+- **Meal logging, two ways** — snap a tray photo (Gemini vision extracts the items)
+  or type them in manually, with autocomplete across 100+ Indian dishes — both land
+  in the same editable list before anything is logged
 - **What-if slider** — drag to see how switching transport mode would change
   today's footprint, recalculated live through the real calculation engine
 - **Hostel leaderboard** — a ranked list plus a drag-to-rotate 3D sphere of the
@@ -45,7 +45,7 @@ US EPA GHG Emission Factors Hub, GHG Protocol / Poore & Nemecek (2018), and CEA
 India's grid baseline. Every API response that includes a number also returns
 what it was computed from, so a judge (or a curious user) can see exactly where
 it came from — the dashboard's own "Where these numbers come from" panel shows
-this directly. Claude's two jobs are strictly: (1) extract structured food items
+this directly. Gemini's two jobs are strictly: (1) extract structured food items
 from a photo, and (2) explain/personalize numbers it's handed. It never computes
 emissions math itself.
 
@@ -54,9 +54,9 @@ emissions math itself.
 - **Frontend:** React + Vite + TypeScript + Tailwind CSS + Recharts
 - **Backend:** Python FastAPI, no database (stateless by design — every response
   is computed fresh, nothing is persisted)
-- **AI:** Anthropic Python SDK (Claude) — vision extraction + text recommendations,
-  with automatic mock-response fallback whenever no API key/credits are available
-  or a call fails, so the app never crashes because of the AI layer
+- **AI:** Google Gemini (google-genai SDK) — vision extraction + text recommendations,
+  with automatic mock-response fallback whenever no API key is set or a call fails,
+  so the app never crashes because of the AI layer
 
 ## Running it locally
 
@@ -75,7 +75,7 @@ npm run dev
 Open `http://localhost:5173`. The frontend proxies `/api` to the backend on 8001.
 
 Runs fully on realistic mock AI responses out of the box — no API key required.
-To use a live Claude key, drop `ANTHROPIC_API_KEY=...` into `backend/.env`; no
+To use a live Gemini key, drop `GEMINI_API_KEY=...` into `backend/.env`; no
 code changes needed.
 
 ```bash
@@ -88,7 +88,7 @@ cd backend && pytest engine/tests -v
 | Endpoint | Purpose |
 | --- | --- |
 | `POST /api/calculate` | Daily footprint from onboarding answers |
-| `POST /api/log-meal` | Photo → structured food items (Claude vision) |
+| `POST /api/log-meal` | Photo → structured food items (Gemini vision) |
 | `POST /api/calculate-meal` | Confirmed meal items → kg CO₂e |
 | `POST /api/recommend` | Footprint breakdown → ranked reduction strategies |
 | `GET /api/leaderboard` | Synthetic hostel leaderboard |

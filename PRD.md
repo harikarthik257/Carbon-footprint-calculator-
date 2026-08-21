@@ -74,12 +74,12 @@ AI-explained action I can take today, and where my hostel ranks."
 **AI-grounded footprint + recommendation engine:**
 1. Deterministic calculation engine (`activity × IPCC/EPA/GHG Protocol factor`) — the
    numbers must never be hand-wavy.
-2. Claude reads a tray photo → structured food-item estimates, shown as an
+2. Gemini reads a tray photo → structured food-item estimates, shown as an
    **editable, pre-filled guess** the student can correct before it's logged (turns
    the vision model's imprecision into a transparency feature instead of a liability
    — which also helps the Technical Feasibility score, since you're not overclaiming
    accuracy).
-3. Claude turns the computed numbers into one sharp, specific, campus-grounded
+3. Gemini turns the computed numbers into one sharp, specific, campus-grounded
    recommendation — never a static lookup-table line.
 
 ## 5. Cut list — for the Round 1 prototype specifically
@@ -98,7 +98,7 @@ five half-built ones in a deck.
 
 | Person | Owns |
 |---|---|
-| **A** | Backend + emission engine + Claude calls — the feature that must be real |
+| **A** | Backend + emission engine + Gemini calls — the feature that must be real |
 | **B** | Frontend — onboarding, dashboard, photo upload UI |
 | **C** *(if 3)* | Deck, proposal narrative, screenshots/demo capture, submission logistics — starts day 1, not day 4 |
 
@@ -123,7 +123,7 @@ slack once the core flow works end-to-end.
 - A judge reading the deck can tell, within ~10 seconds per slide, which of the four
   scored criteria that slide is answering.
 - At least one real screenshot or short clip — not a mockup.
-- The innovation claim is specific ("Claude reads a tray photo and explains your
+- The innovation claim is specific ("Gemini reads a tray photo and explains your
   footprint in one line grounded in an EPA factor"), never generic ("we use AI").
 - Buffer before the 15th: submission logistics, file formats, and a proofread pass —
   don't build anything new in the final hours.

@@ -14,8 +14,8 @@ memory; this file is the snapshot of what actually exists right now.
 - `/api/health` — `{"status": "ok", "mock_ai": bool}`
 - `/api/calculate` — daily footprint from onboarding answers (transport/energy/food/waste)
 - `/api/calculate-meal` — confirmed meal items → kg CO2e
-- `/api/log-meal` — photo → structured food items (Claude vision, mock-fallback)
-- `/api/recommend` — footprint breakdown → 2–3 ranked strategies (Claude text, mock-fallback)
+- `/api/log-meal` — photo → structured food items (Gemini vision, mock-fallback)
+- `/api/recommend` — footprint breakdown → 2–3 ranked strategies (Gemini text, mock-fallback)
 - `/api/leaderboard` — synthetic hostel leaderboard (`is_synthetic: true`)
 - `/api/benchmark` — India national daily per-capita average, for the dashboard's
   "how you compare" stat (sourced: World Bank / Global Carbon Project, ~1.9 t/year;
@@ -37,8 +37,8 @@ one continuous session touching every feature in order.**
 - **Meal logging, two paths into the same confirm step:**
   - **Manual entry** — an "Add a food item manually" button starts an empty,
     editable item row (name + quantity) with no photo required
-  - **Photo upload** — Claude vision extracts items from a tray photo into the
-    same editable list
+  - **Photo upload** — Gemini vision extracts items from a tray photo into the
+    same editable list; manual entry autocompletes against 100+ Indian dishes
   - Both paths share one "Confirm and log" step before anything affects the
     total — the PRD §4 editable-confirm requirement, satisfied either way
 - **What-if slider** — live recalculation through the existing `/api/calculate`
@@ -69,29 +69,35 @@ one continuous session touching every feature in order.**
   in the chat that specified it. Never built. If it's wanted, it needs the
   complete component source pasted again.
 
-## AI calls run fully on mock responses by design
+## AI provider: Google Gemini (swapped from Anthropic/Claude)
 
-Both AI calls (`extract_meal_from_photo`, `generate_recommendation` in
-`backend/engine/claude_client.py`) fall back to mock data (tagged `is_mock: true`)
-whenever `ANTHROPIC_API_KEY` isn't set, `MOCK_AI=true` is forced, **or the Anthropic
-API call itself fails for any reason** (rate limit, network error, an
-out-of-credits account — confirmed working against a real key that had run out of
-credits). This is the accepted Round 1 posture, not a stopgap: the whole demo runs
-end to end on mock responses, and every mock-derived value in the UI is labeled
-`mock response` so a judge always knows which numbers came from a live model call
-versus a canned one.
+The AI layer originally used the Anthropic SDK. It was swapped to Google Gemini
+(`google-genai` SDK, `backend/engine/claude_client.py` — filename kept for now,
+content fully rewritten) because Anthropic's account ran out of credits before
+15 Aug and the team decided not to purchase more before the deadline; Gemini has
+a real, ongoing free tier that covers this project's call volume.
 
-`extract_meal_from_photo` additionally tolerates a model response wrapped in a
-markdown code fence or prose (strips it before parsing, falls back to mock if it's
-still not valid JSON) — this was never actually exercised against a live model
-response, since the funded-key testing never got past the credits issue below.
+Both AI calls (`extract_meal_from_photo`, `generate_recommendation`) fall back to
+mock data (tagged `is_mock: true`) whenever `GEMINI_API_KEY` isn't set, `MOCK_AI=true`
+is forced, or the Gemini API call itself fails for any reason (rate limit, network
+error, a `503` under high demand — all confirmed live). Every mock-derived value in
+the UI is labeled `mock response` so a judge always knows which numbers came from a
+live model call versus a canned one.
 
-Swapping in a funded `ANTHROPIC_API_KEY` requires zero code changes — drop it into
-`backend/.env`, restart the server, and real calls take over automatically. The
-dotenv wiring is confirmed working (`/api/health` returned `mock_ai: false` with a
-real key loaded), but the account had no credits and the team decided not to
-purchase any before the 15 Aug deadline — so the JSON-parsing tolerance above is
-still genuinely untested against a real response, not a settled question.
+Both calls tolerate a model response wrapped in a markdown code fence or prose
+(strips it before parsing, falls back to mock if it's still not valid JSON) — this
+**has** been exercised against live Gemini responses, unlike the Anthropic-era
+version of this doc claimed. Live testing against a real `GEMINI_API_KEY` surfaced
+and fixed three real bugs: the configured model name had been deprecated (now
+`gemini-3.6-flash`), `max_output_tokens` was too low because Gemini's internal
+"thinking" tokens share the same budget as visible output (raised to 4096, confirmed
+live with `finish_reason=STOP` on a complete 3-strategy response), and an attempt to
+disable thinking via `thinking_config` was confirmed live to be rejected outright by
+this model (`400 INVALID_ARGUMENT`) — removed.
+
+Swapping in a `GEMINI_API_KEY` requires zero code changes — drop it into
+`backend/.env`, restart the server, and real calls take over automatically
+(`/api/health` returns `mock_ai: false` once a key is present).
 
 ## Known gaps / judgment calls, worth a second look past Round 1
 
@@ -101,9 +107,10 @@ still genuinely untested against a real response, not a settled question.
   accurate for an IIT Guwahati-specific claim — wired into the calculator but not
   surfaced as a choice in onboarding yet.
 - **Meal photo → factor matching** (`FOOD_ITEM_TO_FACTOR_KEY` in `calculator.py`)
-  only covers ~10 canonical dish names; anything else falls back to a
-  conservative default rather than zero. Check against real IITG dining hall menu
-  items and extend the list — highest-leverage improvement before a live demo.
+  now covers 100+ everyday Indian dishes with fuzzy substring matching for name
+  variants, up from the original ~10; anything still unmatched falls back to a
+  conservative default rather than zero. Still worth checking against the real
+  IITG dining hall menu before a live demo.
 - **Benchmark comparison is a national, all-sector figure**, not a precise
   like-for-like sum of just transport/energy/food/waste. Labeled as illustrative
   context in the UI; a more defensible v2 would benchmark against a
