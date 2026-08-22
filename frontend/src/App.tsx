@@ -27,7 +27,7 @@ export default function App() {
       <header className="relative" style={{ height: 240 }}>
         <div className="relative h-full max-w-3xl mx-auto px-4 flex flex-col justify-center">
           <p className="font-data text-xs uppercase tracking-wider text-river mb-2">
-            IIT Guwahati · Prakriti Club
+            A Personal Project
           </p>
           <MaskedHeading
             tag="h1"

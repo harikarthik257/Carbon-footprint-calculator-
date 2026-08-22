@@ -48,7 +48,7 @@ export default function Dashboard({
       <div className="rounded-2xl overflow-hidden -mt-2 mb-2" style={{ height: 280 }}>
         <ScrollExpand
           src={campusWoods}
-          alt="Wooded stream connecting the campus lakes, IIT Guwahati"
+          alt="Wooded stream connecting the campus lakes"
           title="Your Campus Footprint"
           scrollHint="scroll to reveal"
           useWindowScroll

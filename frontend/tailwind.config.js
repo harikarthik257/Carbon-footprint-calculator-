@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Design tokens grounded in the Brahmaputra-flanked IITG campus,
+        // Design tokens grounded in a wooded, river-flanked campus feel,
         // not the default cream+terracotta AI-generated look.
         paper: "#EEF1EA",      // cool, slightly green-gray off-white
         ink: "#16211B",        // near-black with a green cast, not pure black
