@@ -12,7 +12,7 @@ from api.routes import footprint, meal, recommend, leaderboard, benchmark
 
 app = FastAPI(title="Urban Carbon Footprint Calculator API")
 
-# Wide open for hackathon dev speed — tighten before anything but a demo.
+# Wide open for local dev speed — tighten before anything but a demo.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

@@ -26,7 +26,7 @@ so err toward fewer high-confidence items over many low-confidence ones."""
 
 
 RECOMMENDATION_SYSTEM_PROMPT = """You write specific, ranked carbon-reduction \
-strategies for an IIT Guwahati student, based on numbers already computed by \
+strategies for a college student, based on numbers already computed by \
 a deterministic calculation engine — you do not calculate or estimate any numbers \
 yourself, you only explain and personalize the ones you're given.
 

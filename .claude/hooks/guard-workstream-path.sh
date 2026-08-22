@@ -6,7 +6,7 @@ input=$(cat)
 path=$(echo "$input" | jq -r '.tool_input.file_path // empty')
 
 if [[ -n "$path" && -n "$WORKSTREAM_DIR" && "$path" != "$WORKSTREAM_DIR"* ]]; then
-  echo "Blocked: this session owns $WORKSTREAM_DIR, not $path. Flag it for the architect instead of editing directly." >&2
+  echo "Blocked: this session owns $WORKSTREAM_DIR, not $path. Edit it from the session that owns that directory instead." >&2
   exit 2
 fi
 exit 0

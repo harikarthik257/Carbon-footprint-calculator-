@@ -24,8 +24,8 @@ def log_meal(req: LogMealRequest):
     items = extraction.get("items", [])
 
     # Nothing is "logged" yet at this point — the frontend shows these items
-    # as an editable pre-filled list (see PRD.md §4) and calls /calculate-meal
-    # (below) once the student confirms/edits quantities.
+    # as an editable pre-filled list (see PRD.md §2) and calls /calculate-meal
+    # (below) once the user confirms/edits quantities.
     calc = calculate_meal_emissions(items) if items else None
 
     return {

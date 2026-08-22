@@ -1,27 +1,23 @@
 ---
-name: hackathon-team-stack
-description: "Use this whenever writing, editing, or reviewing code in this hackathon
-repo (Urban Carbon Footprint Calculator, Avinya 2026: Prakriti EcoInnovate Challenge).
-Covers the team's stack, folder conventions, the emission-calculation API contract,
-and how to add/change an emission factor without breaking the calculation engine.
-Trigger for any frontend, backend, or emission-engine work in this repo."
+name: carbon-footprint-stack
+description: "Use this whenever writing, editing, or reviewing code in this repo
+(Urban Carbon Footprint Calculator, a personal project). Covers the stack, folder
+conventions, the emission-calculation API contract, and how to add/change an
+emission factor without breaking the calculation engine. Trigger for any frontend,
+backend, or emission-engine work in this repo."
 ---
 
-# Team stack — Urban Carbon Footprint Calculator
+# Project stack — Urban Carbon Footprint Calculator
 
-Place this at `.claude/skills/hackathon-team-stack/SKILL.md` (or repo-root `SKILL.md`
-if you're not using the skills folder convention). Claude Code loads it automatically
-whenever a task in this repo matches its description — no re-explaining per session.
-
-**Timing note:** Round 1 (due 15 Aug) only needs a thin, screenshot-able slice built
-this way — see `PRD.md` §5 for the cut list. This skill earns its full value in
-Round 2 (27–30 Aug), when the team is building for real under time pressure and every
-session benefiting from the same conventions actually matters.
+Place this at `.claude/skills/carbon-footprint-stack/SKILL.md` (or repo-root
+`SKILL.md` if you're not using the skills folder convention). Claude Code loads it
+automatically whenever a task in this repo matches its description — no
+re-explaining per session.
 
 ## Stack
 
 - **Frontend:** React + Vite + TypeScript + Tailwind CSS + Recharts
-- **Backend:** Python FastAPI, no database (deliberate — no auth/persistence for Round 1)
+- **Backend:** Python FastAPI, no database (deliberate — no auth/persistence for now)
 - **AI:** Google Gemini (`google-genai` package) — vision calls for meal-photo
   logging, text calls for personalized recommendations. Swapped in from the
   Anthropic SDK after the funded Anthropic account ran out of credits; Gemini's
@@ -56,7 +52,7 @@ POST /api/calculate-meal
   body: { items: [{name: str, quantity: float}] }
   returns: { total_kg_co2e, by_category: {...}, factors_used: [...] }
   (used by both the manual-entry and photo-upload meal-logging paths — same
-  editable-confirm step either way, per PRD.md §4)
+  editable-confirm step either way)
 
 POST /api/recommend
   body: { total_kg_co2e: float, by_category: {...} }
@@ -73,8 +69,8 @@ GET /api/benchmark
 ```
 
 Every response that includes a number also includes what it was computed from
-(`factors_used` / `grounded_in`). This is a hard rule — it's what makes the AI layer
-defensible in front of a judge instead of a black box.
+(`factors_used` / `grounded_in`). This is a hard rule — it's what keeps the AI layer
+transparent instead of a black box.
 
 ## Emission-factor conventions
 
@@ -87,8 +83,7 @@ defensible in front of a judge instead of a black box.
   }
   ```
 - Never inline a numeric emission factor anywhere else in the codebase — always
-  reference this table, so the "one source of truth" claim in the pitch is actually
-  true when a judge checks.
+  reference this table, so the "one source of truth" claim actually holds up.
 - Adding a new factor: add the entry here, add one test in
   `backend/engine/tests/test_factors.py` asserting the calculation engine uses it
   correctly, then wire it into the relevant route.
@@ -99,10 +94,10 @@ defensible in front of a judge instead of a black box.
   Gemini call. Gemini never invents an emissions number — it receives already-computed
   numbers and factors, and its job is (a) structured extraction from an image, or (b)
   turning numbers into a specific, personalized recommendation string.
-- Keep prompts in `backend/engine/prompts.py`, not inlined in route handlers, so the
-  architect can review/tune wording in one place during integration.
-- Every Gemini response used in the UI should be short enough to read in the demo
-  without scrolling — cap recommendation text server-side if needed.
+- Keep prompts in `backend/engine/prompts.py`, not inlined in route handlers, so
+  wording can be reviewed/tuned in one place.
+- Every Gemini response used in the UI should be short enough to read without
+  scrolling — cap recommendation text server-side if needed.
 
 ## Running things
 

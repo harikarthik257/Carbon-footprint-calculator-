@@ -1,9 +1,8 @@
-# HANDOFF.md — final Round 1 status
+# HANDOFF.md — current build status
 
-This repo is **code-frozen for Round 1** (15 Aug submission). Everything below is
-built, wired, and verified end to end in a real browser against a real running
-backend — not just read from source. `CLAUDE.md` has the permanent stack/convention
-memory; this file is the snapshot of what actually exists right now.
+Everything below is built, wired, and verified end to end in a real browser against
+a real running backend — not just read from source. `CLAUDE.md` has the permanent
+stack/convention memory; this file is the snapshot of what actually exists right now.
 
 ---
 
@@ -40,7 +39,7 @@ one continuous session touching every feature in order.**
   - **Photo upload** — Gemini vision extracts items from a tray photo into the
     same editable list; manual entry autocompletes against 100+ Indian dishes
   - Both paths share one "Confirm and log" step before anything affects the
-    total — the PRD §4 editable-confirm requirement, satisfied either way
+    total — the editable-confirm requirement from `PRD.md`, satisfied either way
 - **What-if slider** — live recalculation through the existing `/api/calculate`
   endpoint (no duplicated emission math in the frontend), confirmed to produce a
   real, correct delta when transport mode or distance changes
@@ -73,15 +72,15 @@ one continuous session touching every feature in order.**
 
 The AI layer originally used the Anthropic SDK. It was swapped to Google Gemini
 (`google-genai` SDK, `backend/engine/claude_client.py` — filename kept for now,
-content fully rewritten) because Anthropic's account ran out of credits before
-15 Aug and the team decided not to purchase more before the deadline; Gemini has
-a real, ongoing free tier that covers this project's call volume.
+content fully rewritten) because the Anthropic account ran out of credits and it
+wasn't worth topping up; Gemini has a real, ongoing free tier that covers this
+project's call volume.
 
 Both AI calls (`extract_meal_from_photo`, `generate_recommendation`) fall back to
 mock data (tagged `is_mock: true`) whenever `GEMINI_API_KEY` isn't set, `MOCK_AI=true`
 is forced, or the Gemini API call itself fails for any reason (rate limit, network
 error, a `503` under high demand — all confirmed live). Every mock-derived value in
-the UI is labeled `mock response` so a judge always knows which numbers came from a
+the UI is labeled `mock response` so it's always clear which numbers came from a
 live model call versus a canned one.
 
 Both calls tolerate a model response wrapped in a markdown code fence or prose
@@ -99,30 +98,29 @@ Swapping in a `GEMINI_API_KEY` requires zero code changes — drop it into
 `backend/.env`, restart the server, and real calls take over automatically
 (`/api/health` returns `mock_ai: false` once a key is present).
 
-## Known gaps / judgment calls, worth a second look past Round 1
+## Known gaps / judgment calls, worth a second look later
 
 - **India grid electricity factor**: `energy.grid_electricity_kwh` uses the
   *national* CEA average (0.71 kg CO2e/kWh). There's also a
-  `..._hydro_weighted` factor (0.30) for the Northeast regional grid, more
-  accurate for an IIT Guwahati-specific claim — wired into the calculator but not
-  surfaced as a choice in onboarding yet.
+  `..._hydro_weighted` factor (0.30) for a hydro-heavy regional grid, more
+  accurate for some regions — wired into the calculator but not surfaced as a
+  choice in onboarding yet.
 - **Meal photo → factor matching** (`FOOD_ITEM_TO_FACTOR_KEY` in `calculator.py`)
   now covers 100+ everyday Indian dishes with fuzzy substring matching for name
   variants, up from the original ~10; anything still unmatched falls back to a
-  conservative default rather than zero. Still worth checking against the real
-  IITG dining hall menu before a live demo.
+  conservative default rather than zero.
 - **Benchmark comparison is a national, all-sector figure**, not a precise
   like-for-like sum of just transport/energy/food/waste. Labeled as illustrative
   context in the UI; a more defensible v2 would benchmark against a
   transport+energy+food+waste-only reference if one can be sourced.
-- **CORS is wide open** (`allow_origins=["*"]`) — fine for a hackathon demo,
-  tighten past Round 2.
-- **No auth, no persistence** — deliberate, per `PRD.md` §5 cut list.
+- **CORS is wide open** (`allow_origins=["*"]`) — fine for local dev, tighten
+  before any real deployment.
+- **No auth, no persistence** — deliberate, per `PRD.md` cut list.
 
 ## Where the context lives
 
-- `PRD.md` — scope, cut list, task breakdown, the actual marking scheme this is scored against
+- `PRD.md` — scope, cut list, roadmap
 - `CLAUDE.md` — permanent stack/convention memory, loads automatically every session
-- `.claude/skills/hackathon-team-stack/SKILL.md` — API contract, emission-factor conventions
-- `pitch/screenshots/` — current, freshly captured screenshots for the Round 1 deck
+- `.claude/skills/carbon-footprint-stack/SKILL.md` — API contract, emission-factor conventions
+- `pitch/screenshots/` — current, freshly captured screenshots
 - `HOOKS.md` — why each hook in `.claude/settings.json` exists

@@ -1,6 +1,6 @@
-"""Synthetic leaderboard data. Per PRD.md §5, a live leaderboard is cut for
-Round 1 — this is deliberately labeled is_synthetic so the UI never presents
-it as real usage data."""
+"""Synthetic leaderboard data. A live leaderboard is out of scope for now —
+this is deliberately labeled is_synthetic so the UI never presents it as
+real usage data."""
 
 SEED_LEADERBOARD = {
     "is_synthetic": True,

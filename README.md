@@ -1,10 +1,9 @@
 # Urban Carbon Footprint Calculator
 
-A campus carbon footprint calculator built for **Avinya 2026: Prakriti EcoInnovate
-Challenge** (Prakriti × Techniche, IIT Guwahati) — Problem Statement #2. It measures
-a student's daily carbon footprint across transport, energy, food, and waste, then
-uses Gemini to turn those numbers into personalized, ranked reduction strategies —
-grounded in a deterministic emissions engine, not invented by the model.
+A personal project: a campus carbon footprint calculator that measures a student's
+daily carbon footprint across transport, energy, food, and waste, then uses Gemini
+to turn those numbers into personalized, ranked reduction strategies — grounded in
+a deterministic emissions engine, not invented by the model.
 
 ![Dashboard overview](pitch/screenshots/02-dashboard-overview.png)
 
@@ -43,8 +42,8 @@ Every number the app shows traces back to a sourced emission factor in
 [`backend/data/emission_factors.py`](backend/data/emission_factors.py) — IPCC AR6,
 US EPA GHG Emission Factors Hub, GHG Protocol / Poore & Nemecek (2018), and CEA
 India's grid baseline. Every API response that includes a number also returns
-what it was computed from, so a judge (or a curious user) can see exactly where
-it came from — the dashboard's own "Where these numbers come from" panel shows
+what it was computed from, so a curious user can see exactly where it came from —
+the dashboard's own "Where these numbers come from" panel shows
 this directly. Gemini's two jobs are strictly: (1) extract structured food items
 from a photo, and (2) explain/personalize numbers it's handed. It never computes
 emissions math itself.
@@ -95,7 +94,7 @@ cd backend && pytest engine/tests -v
 | `GET /api/benchmark` | India daily per-capita average, for comparison |
 | `GET /api/health` | Service + mock-mode status |
 
-## What's intentionally out of scope for Round 1
+## What's intentionally out of scope for now
 
 No auth, no persistence, no production deployment — this is a thin, demoable
 slice built to showcase the AI-grounded calculation approach, not a production
@@ -105,6 +104,6 @@ known, judgment-called gap.
 
 ## Project docs
 
-- [`PRD.md`](PRD.md) — scope, cut list, task breakdown
+- [`PRD.md`](PRD.md) — scope, cut list, roadmap
 - [`HANDOFF.md`](HANDOFF.md) — current build status, what's verified, known gaps
 - [`CLAUDE.md`](CLAUDE.md) — stack/convention reference for this repo

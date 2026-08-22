@@ -6,7 +6,7 @@ The AI layer. Two calls only:
 Hard rule (see CLAUDE.md): the AI never computes emissions math. It receives
 numbers already computed by engine/calculator.py and either (a) extracts
 structured data from an image, or (b) explains numbers it's handed. This
-keeps the "AI-grounded" claim in the pitch deck literally true.
+keeps the "AI-grounded" claim about this app literally true.
 
 Provider: Google Gemini (google-genai SDK), swapped in from Anthropic/Claude.
 Chosen for a real, ongoing free tier (rate-limited, not a time-limited trial
@@ -22,9 +22,9 @@ network is flaky on the actual demo day. Every mock response is tagged
 
 The same mock fallback also covers any Gemini API error at call time (rate
 limits, network issues, an out-of-quota account — the exact failure we hit
-with Anthropic during Round 1 prep, before this provider swap). A failed API
-call degrades to a mock response rather than a 500, so a demo never crashes
-because a call to Gemini failed.
+with Anthropic before this provider swap). A failed API call degrades to a
+mock response rather than a 500, so a demo never crashes because a call to
+Gemini failed.
 
 Both functions tolerate a model response that isn't bare JSON:
 _strip_json_wrapping() strips whitespace and, if it detects a ```-fenced

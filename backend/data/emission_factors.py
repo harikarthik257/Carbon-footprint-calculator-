@@ -4,8 +4,8 @@ Per SKILL.md: never hardcode a factor anywhere else in the codebase.
 
 Sources: IPCC AR6 default factors, US EPA GHG Emission Factors Hub (2025),
 GHG Protocol Scope 1-3 guidance. Where a source gives a range, we take the
-midpoint and note it — defensible in front of a judge who asks "where does
-that number come from."
+midpoint and note it — defensible if anyone asks "where does that number
+come from."
 """
 
 EMISSION_FACTORS = {

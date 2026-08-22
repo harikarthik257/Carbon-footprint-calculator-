@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # PostToolUse hook on Write|Edit. If the edit touched backend/engine, run its
-# tests immediately — this is the "must work perfectly" feature (PRD.md §4),
+# tests immediately — this is the "must work perfectly" feature (PRD.md §2),
 # it should never break silently mid-build.
 input=$(cat)
 path=$(echo "$input" | jq -r '.tool_input.file_path // empty')
